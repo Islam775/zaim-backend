@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +23,11 @@ app.post("/send-sms", async (req, res) => {
 
     const cleanedPhone = phone.replace(/\D/g, '');
     const message = `Код подтверждения: ${code}`;
-    const url = `https://smsc.kz/sys/send.php?login=islam775&psw=egieV0695&phones=${cleanedPhone}&mes=${encodeURIComponent(message)}&fmt=1`;
+    const login = process.env.SMSC_LOGIN;
+    const psw = process.env.SMSC_PASSWORD;
+    const sender = process.env.SMSC_SENDER || '';
+
+    const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${psw}&phones=${cleanedPhone}&mes=${encodeURIComponent(message)}&sender=${sender}&fmt=1`;
 
     const response = await fetch(url);
     const data = await response.json();
