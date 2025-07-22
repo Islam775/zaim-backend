@@ -32,13 +32,8 @@ app.post("/send-sms", async (req, res) => {
     const response = await fetch(url);
     const text = await response.text();
 
-let data;
-try {
-  data = JSON.parse(text);
-} catch (err) {
-  console.error("❌ Ошибка парсинга ответа от SMSC:", text);
-  return res.status(500).json({ success: false, error: "Некорректный ответ от SMSC" });
-}
+console.log("📨 Ответ от SMSC (raw):", text);
+res.json({ success: true, response: text });
 
     console.log("📨 Результат отправки SMS:", data);
     res.json({ success: true, data });
