@@ -1,32 +1,32 @@
-const express = require('express');
-const cors = require('cors');
-const fetch = require('node-fetch');
+const express = require("express");
+const cors = require("cors");
+const fetch = require("node-fetch");
 
 const app = express();
-app.use(cors({
-  origin: 'https://zaim-market.onrender.com'
-}));
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 app.use(express.json());
 
-app.post('/send-sms', async (req, res) => {
+app.get("/", (req, res) => {
+  res.json({ message: "Сервер работает" });
+});
+
+app.post("/send-sms", async (req, res) => {
   const { phone, code } = req.body;
-
-  console.log("📨 Новая заявка получена с сайта:", { phone, code });
-
-  const smsUrl = `https://smsc.kz/sys/send.php?login=islam775&psw=egieV0695&phones=${phone.replace(/\D/g, '')}&mes=Код подтверждения: ${code}&fmt=1`;
+  const url = `https://smsc.kz/sys/send.php?login=LOGIN&psw=PASSWORD&phones=${phone}&mes=Код подтверждения: ${code}&fmt=1`;
 
   try {
-    const response = await fetch(smsUrl);
-    const data = await response.text();
-    console.log("📲 Ответ от SMSC:", data);
-    res.status(200).send("OK");
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("📨 SMS отправлено:", phone, code);
+    res.json({ success: true, data });
   } catch (err) {
-    console.error("❌ Ошибка отправки SMS:", err);
-    res.status(500).send("Ошибка");
+    console.error("❌ Ошибка отправки:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`✅ Сервер запущен на порту ${PORT}`);
 });
