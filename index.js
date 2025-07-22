@@ -1,6 +1,6 @@
-const express = require("express");
-const cors = require("cors");
-const fetch = require("node-fetch");
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,16 +13,24 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send-sms", async (req, res) => {
-  const { phone, code } = req.body;
-  const url = `https://smsc.kz/sys/send.php?login=LOGIN&psw=PASSWORD&phones=${phone}&mes=Код подтверждения: ${code}&fmt=1`;
-
   try {
+    const { phone, code } = req.body;
+
+    if (!phone || !code) {
+      return res.status(400).json({ success: false, error: "Номер и код обязательны" });
+    }
+
+    const cleanedPhone = phone.replace(/\D/g, '');
+    const message = `Код подтверждения: ${code}`;
+    const url = `https://smsc.kz/sys/send.php?login=islam775&psw=egieV0695&phones=${cleanedPhone}&mes=${encodeURIComponent(message)}&fmt=1`;
+
     const response = await fetch(url);
     const data = await response.json();
-    console.log("📨 SMS отправлено:", phone, code);
+
+    console.log("📨 Результат отправки SMS:", data);
     res.json({ success: true, data });
   } catch (err) {
-    console.error("❌ Ошибка отправки:", err);
+    console.error("❌ Ошибка на /send-sms:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });
