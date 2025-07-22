@@ -30,7 +30,15 @@ app.post("/send-sms", async (req, res) => {
     const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${psw}&phones=${cleanedPhone}&mes=${encodeURIComponent(message)}&sender=${sender}&fmt=1`;
 
     const response = await fetch(url);
-    const data = await response.json();
+    const text = await response.text();
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch (err) {
+  console.error("❌ Ошибка парсинга ответа от SMSC:", text);
+  return res.status(500).json({ success: false, error: "Некорректный ответ от SMSC" });
+}
 
     console.log("📨 Результат отправки SMS:", data);
     res.json({ success: true, data });
